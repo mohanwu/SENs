@@ -6,7 +6,7 @@ import math
 import json
 from PIL import Image
 
-#Will crop IM_NUM # of images from target folder
+#Will crop IM_NUM # of images from targets folders
 # targets = ['ALB', 'BET', 'DOL', 'LAG', 'SHARK', 'YFT']
 targets = ['ALB']
 IM_NUM = -1
