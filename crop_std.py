@@ -7,9 +7,10 @@ import json
 from PIL import Image
 
 #Will crop IM_NUM # of images from targets folders
-# targets = ['ALB', 'BET', 'DOL', 'LAG', 'SHARK', 'YFT']
-targets = ['ALB']
+targets = ['ALB', 'BET', 'DOL', 'LAG', 'SHARK', 'YFT']
+# targets = ['ALB']
 IM_NUM = -1
+image_size = (64,64)
 # If IM_NUM is -1 then will do all images (except the last one)
 
 if os.path.isdir(os.getcwd()+"/train/cropped") == False:
@@ -62,7 +63,7 @@ def crop_and_resize(target):
             x_end = min(x_start + big_range + big_range*0.1, width)
             crop_img = sample_img.crop((int(x_start),int(y_start),int(x_end),int(y_end)))
             #crop_img = sample_img[int(y_start - y_range):int(y_end + y_range), int(x_start - x_range):int(x_end + x_range)]
-            crop_img = crop_img.resize((120,120), Image.ANTIALIAS)
+            crop_img = crop_img.resize(image_size, Image.ANTIALIAS)
             crop_img.save(img_loc + 'cropped/'+target+'/' + filename, "JPEG")
             print img_loc + 'cropped/'+target+'/' + filename
 
