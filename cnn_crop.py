@@ -7,7 +7,7 @@ from __future__ import print_function
 import os
 import numpy as np
 np.random.seed(1337)  # for reproducibility
-import cropped_images
+import fish_images
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -17,11 +17,11 @@ from keras import backend as K
 
 
 batch_size = 128
-nb_classes = 6
+nb_classes = 8
 nb_epoch = 25
 
 # input image dimensions
-img_rows, img_cols = 64, 64
+img_rows, img_cols = 256, 256
 # number of convolutional filters to use
 nb_filters = 32
 # size of pooling area for max pooling
@@ -31,7 +31,7 @@ kernel_size = (3, 3)
 
 # the data, shuffled and split between train and test sets
 
-X_train,y_train,X_test,y_test = cropped_images.load_data()
+X_train,y_train,X_test,y_test = fish_images.load_data()
 # (X_train, y_train), (X_test, y_test) = mnist.load_data()
 if K.image_dim_ordering() == 'th':
     X_train = X_train.reshape(X_train.shape[0], 3, img_rows, img_cols)

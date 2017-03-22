@@ -18,6 +18,33 @@ if os.path.isdir(os.getcwd()+"/train/cropped") == False:
     fish_dirs = ['ALB', 'BET', 'DOL', 'LAG', 'NoF', 'OTHER', 'SHARK', 'YFT']
     for d in fish_dirs:
         os.makedirs(os.getcwd()+"/train/cropped/"+d)
+def deg_angle_between(x1,y1,x2,y2):
+    from math import atan2, degrees, pi
+    dx = x2 - x1
+    dy = y2 - y1
+    rads = atan2(-dy,dx)
+    rads %= 2*pi
+    degs = degrees(rads)
+    return(degs)
+
+def get_rotated_cropped_fish(img,x1,y1,x2,y2):
+    (h,w) = img.shape[:2]
+    #calculate center and angle
+    center = ( (x1+x2) / 2,(y1+y2) / 2)
+    angle = np.floor(-deg_angle_between(x1,y1,x2,y2))
+    #print('angle=' +str(angle) + ' ')
+    #print('center=' +str(center))
+    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+    rotated = cv2.warpAffine(img, M, (w, h))
+
+    fish_length = np.sqrt((x1-x2)**2+(y1-y2)**2)
+    cropped = rotated[(max((center[1]-fish_length/1.8),0)):(max((center[1]+fish_length/1.8),0)) ,
+                      (max((center[0]- fish_length/1.8),0)):(max((center[0]+fish_length/1.8),0))]
+    #imshow(img)
+    #imshow(rotated)
+    #imshow(cropped)
+    resized = resize(cropped,(224,224))
+    return(resized)
 
 def crop_and_resize(target):
     print target
@@ -42,6 +69,7 @@ def crop_and_resize(target):
             if len(y_) != 2 or len(x_) != 2:
                 continue
             ALB_dict[f_name] = (x_, y_)
+
     for filename in os.listdir(ALB):
         if filename.endswith('.jpg') and ALB_dict.has_key(filename):
             sample_img = Image.open(ALB + filename)

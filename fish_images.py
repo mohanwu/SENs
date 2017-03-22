@@ -5,18 +5,18 @@ def create_pickle():
     import pickle
     np.random.seed(5)
     print "Creating Pickle"
-    crop_folders = ['ALB', 'BET', 'DOL', 'LAG', 'SHARK', 'YFT']
+    img_folders = ['ALB', 'BET', 'DOL', 'LAG', 'SHARK', 'YFT','OTHER','NoF']
     X = []
     Y = []
     img_data = {}
-    for (label,folder) in enumerate(crop_folders):
-        temp_file_names = os.listdir(os.getcwd()+"/train/cropped/"+folder+"/")
-        temp_file_names = map(lambda x: os.getcwd()+"/train/cropped/"+folder+"/"+x, temp_file_names)
+    for (label,folder) in enumerate(img_folders):
+        temp_file_names = os.listdir(os.getcwd()+"/train/"+folder+"/")
+        temp_file_names = map(lambda x: os.getcwd()+"/train/"+folder+"/"+x, temp_file_names)
         Y += [label for x in xrange(len(temp_file_names))]
         X += temp_file_names
 
     #Creates Images from filepaths
-    X = map(lambda f_name: np.asarray( Image.open(f_name), dtype='uint8' ), X)
+    X = map(lambda f_name: np.asarray( Image.open(f_name).resize((256,256)), dtype='uint8' ), X)
 
     X = np.asarray(X,dtype='uint8')
     Y = np.asarray(Y,dtype='uint8')
@@ -29,15 +29,15 @@ def create_pickle():
     img_data['y_train'] = y_train
     img_data['X_test'] = X_test
     img_data['y_test'] = y_test
-    with open('crop_img_data.pkl', 'wb') as my_pickle:
+    with open('img_data.pkl', 'wb') as my_pickle:
         pickle.dump(img_data,my_pickle)
 
 def load_data():
     import os
-    if(os.path.isfile(os.getcwd()+"/crop_img_data.pkl") == False):
+    if(os.path.isfile(os.getcwd()+"/img_data.pkl") == False):
         create_pickle()
     import pickle
-    with open("crop_img_data.pkl","rb") as img_f:
+    with open("img_data.pkl","rb") as img_f:
         data = pickle.load(img_f)
     return (data['X_train'],data['y_train'],data['X_test'],data['y_test'])
 
