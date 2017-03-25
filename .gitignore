@@ -1,2 +1,4 @@
-.pkl
-train
+*.pkl
+train/
+crop_coord/
+*.h5
