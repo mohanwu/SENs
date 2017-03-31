@@ -1,6 +1,7 @@
 import numpy as np
 import os
 parent_dir = os.path.dirname(os.getcwd())
+
 def create_pickle():
     import os
     from PIL import Image
@@ -31,12 +32,13 @@ def create_pickle():
     img_data['y_train'] = y_train
     img_data['X_test'] = X_test
     img_data['y_test'] = y_test
-    with open('encoder_data.pkl', 'wb') as my_pickle:
+    with open(parent_dir+'/encoder_data.pkl', 'wb') as my_pickle:
         pickle.dump(img_data,my_pickle)
 
 def load_data(perc=0.7):
     import os
     if(os.path.isfile(parent_dir+"/encoder_data.pkl") == False):
+        import crop_std
         create_pickle()
     import pickle
     with open(parent_dir+"/encoder_data.pkl","rb") as img_f:

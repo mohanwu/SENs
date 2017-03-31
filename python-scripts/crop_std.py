@@ -5,19 +5,19 @@ import numpy
 import math
 import json
 from PIL import Image
-
+parent_dir = os.path.dirname(os.getcwd())
 #Will crop IM_NUM # of images from targets folders
 targets = ['ALB', 'BET', 'DOL', 'LAG', 'SHARK', 'YFT']
 # targets = ['ALB']
 IM_NUM = -1
-image_size = (64,64)
+image_size = (32,32)
 # If IM_NUM is -1 then will do all images (except the last one)
 
-if os.path.isdir(os.getcwd()+"/train/cropped") == False:
-    os.makedirs(os.getcwd()+"/train/cropped")
+if os.path.isdir(parent_dir+"/train/cropped") == False:
+    os.makedirs(parent_dir+"/train/cropped")
     fish_dirs = ['ALB', 'BET', 'DOL', 'LAG', 'NoF', 'OTHER', 'SHARK', 'YFT']
     for d in fish_dirs:
-        os.makedirs(os.getcwd()+"/train/cropped/"+d)
+        os.makedirs(parent_dir+"/train/cropped/"+d)
 def deg_angle_between(x1,y1,x2,y2):
     from math import atan2, degrees, pi
     dx = x2 - x1
@@ -48,10 +48,10 @@ def get_rotated_cropped_fish(img,x1,y1,x2,y2):
 
 def crop_and_resize(target):
     print target
-    img_loc = os.getcwd()+'/train/'
+    img_loc = parent_dir+'/train/'
     ALB = img_loc + target+'/'
     ALB_dict = dict()
-    with open(os.getcwd()+"/crop_coord/"+target.lower()+'_labels.json') as data_file:
+    with open(parent_dir+"/crop_coord/"+target.lower()+'_labels.json') as data_file:
         data = json.load(data_file)
 
     for cur_entry in data[:IM_NUM]:
