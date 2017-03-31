@@ -2,3 +2,4 @@
 train/
 crop_coord/
 *.h5
+*.pyc
