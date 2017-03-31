@@ -1,5 +1,6 @@
 from autoencoder_2 import *
 import matplotlib.pyplot as plt
+import pdb
 n = 10
 autoencoder.load_weights("cnn_autoencoder_weights.h5")
 plt.figure(figsize=(20, 4))
