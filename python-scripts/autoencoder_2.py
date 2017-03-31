@@ -77,7 +77,7 @@ encoded = Flatten()(encoded)
 encoded = Dense(1024, activation='sigmoid')(encoded)
 
 autoencoder = Model(input_img, encoded)
-autoencoder.compile(optimizer='adadelta', loss='poisson')
+autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
 # at this point the representation is (32*32, 1)
 
 # autoencoder.load_weights("cnn_autoencoder_weights.h5")

@@ -1,4 +1,6 @@
 import numpy as np
+import os
+parent_dir = os.path.dirname(os.getcwd())
 def create_pickle():
     import os
     from PIL import Image
@@ -10,15 +12,15 @@ def create_pickle():
     Y = []
     img_data = {}
     for (label,folder) in enumerate(crop_folders):
-        orig_file_names = os.listdir(os.getcwd()+"/train/cropped/"+folder+"/")
-        X += map(lambda x: os.getcwd()+"/train/"+folder+"/"+x, orig_file_names)
-        crop_file_names = map(lambda x: os.getcwd()+"/train/cropped/"+folder+"/"+x, orig_file_names)
+        orig_file_names = os.listdir(parent_dir+"/train/cropped/"+folder+"/")
+        X += map(lambda x: parent_dir+"/train/"+folder+"/"+x, orig_file_names)
+        crop_file_names = map(lambda x: parent_dir+"/train/cropped/"+folder+"/"+x, orig_file_names)
         Y += crop_file_names
 
 
     #Creates Images from filepaths
-    X = map(lambda f_name: np.asarray( Image.open(f_name).convert('L').resize((256,256)), dtype='uint8' ), X)
-    Y = map(lambda f_name: np.asarray( Image.open(f_name).convert('L'), dtype='uint8' ), Y)
+    X = map(lambda f_name: np.asarray( Image.open(f_name).convert('L').resize((128,128)), dtype='uint8' ), X)
+    Y = map(lambda f_name: np.asarray( Image.open(f_name).convert('L').resize((32,32)), dtype='uint8' ), Y)
     X = np.asarray(X,dtype='uint8')
     Y = np.asarray(Y,dtype='uint8')
 
@@ -34,10 +36,10 @@ def create_pickle():
 
 def load_data(perc=0.7):
     import os
-    if(os.path.isfile(os.getcwd()+"/encoder_data.pkl") == False):
+    if(os.path.isfile(parent_dir+"/encoder_data.pkl") == False):
         create_pickle()
     import pickle
-    with open("encoder_data.pkl","rb") as img_f:
+    with open(parent_dir+"/encoder_data.pkl","rb") as img_f:
         data = pickle.load(img_f)
     return test_train_split(np.concatenate((data['X_train'],data['X_test']),axis=0),
                     np.concatenate((data['y_train'],data['y_train']),axis=0),perc)
