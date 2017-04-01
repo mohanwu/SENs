@@ -4,9 +4,10 @@ import sklearn
 import crop_encoder_data
 import cv2
 import matplotlib.pyplot as plt
-
-path = '/Users/PeterWang/Documents/code/SEN/train/cropped/ALB/img_00039.jpg'
+parent_dir = os.path.dirname(os.getcwd())
+path = parent_dir+'/train/cropped/ALB/img_00039.jpg'
 sample_img = cv2.imread(path, 0)
+radius = 2000
 
 def L2(t, g):
   return np.linalg.norm(t-g)
@@ -39,12 +40,16 @@ def bin_srch(rad, low, high, loss_fn, target, rand_vec, eps):
 
 def diff_search(rand_vec, loss_fn, target):
   err = list()
+  scales = []
   for x in xrange(1, 20000):
-    new_vec = rand_vec * x * 0.5 + target
+    new_vec = rand_vec * x + target
     cur_d = dist(new_vec, target, loss_fn)
+    scales.append(x)
     err.append(cur_d)
-  print str(min(err)) + ' at ' + str(0.5*(err.index(min(err)) + 1))
-  return (err.index(min(err))+1)*0.5*rand_vec + target
+  centered_err = [abs(e-radius) for e in err]
+  print str(min(centered_err)) + ' at ' + str(scales[centered_err.index(min(centered_err))])
+  print min(centered_err)
+  return (scales[centered_err.index(min(centered_err))]*rand_vec + target)
 
 
 # returns a list of vectors that each
@@ -65,10 +70,13 @@ def generate(target, points, loss_fn=L2, s1=0.000001, s2=10000):
     #s = bin_srch(rad=1000.0, low=s1, high=s2, loss_fn=L2, target=target, rand_vec = rand_arr, eps=0.25)
     print "done: " + str(x)
     imgs.append(s)
-  for x in imgs:
-    plt.figure()
-    plt.imshow(x)
-  plt.figure()
+  for (i,img) in enumerate(imgs):
+    ax = plt.subplot((points/5) + 1, 5, i+1)
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    plt.imshow(img)
+  ax = plt.subplot(3, 5, points+1)
+  plt.title("radius = "+str(radius))
   plt.imshow(target)
   plt.show()
 
