@@ -12,7 +12,8 @@ from keras.callbacks import TensorBoard
 from keras.datasets import mnist
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D, Input
+from keras.layers import Convolution2D, MaxPooling2D, Input, Conv2D, Dropout
+from keras import regularizers
 from keras.utils import np_utils
 from keras import backend as K
 from PIL import Image
@@ -70,12 +71,15 @@ kernel_size = (3,3)
 pool_size = (2,2)
 
 input_img = Input(shape=(img_rows,img_cols,1))
-encoded = Convolution2D(nb_filters*2,kernel_size[0],kernel_size[1],
-            border_mode="same",activation='relu')(input_img)
-encoded = Convolution2D(nb_filters,kernel_size[0],kernel_size[1],
-            border_mode="same",activation='relu')(encoded)
+encoded = Conv2D(nb_filters*2,kernel_size[0],kernel_size[1],
+            border_mode="same",activation='relu',
+            W_regularizer=regularizers.l1(0.01))(input_img)
+encoded = Conv2D(nb_filters,kernel_size[0],kernel_size[1],
+            border_mode="same",activation='relu',
+            W_regularizer=regularizers.l1(0.01))(encoded)
+encoded = Dropout(0.5)(encoded)
 encoded = MaxPooling2D(pool_size=(2,2))(encoded)
-encoded = Convolution2D(nb_filters,kernel_size[0],kernel_size[1],
+encoded = Conv2D(nb_filters,kernel_size[0],kernel_size[1],
             border_mode="same",activation='relu')(encoded)
 encoded = MaxPooling2D(pool_size=(2,2))(encoded)
 encoded = Flatten()(encoded)
