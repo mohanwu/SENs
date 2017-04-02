@@ -4,15 +4,33 @@ import sklearn
 import crop_encoder_data
 import cv2
 import matplotlib.pyplot as plt
+from skimage import measure
 parent_dir = os.path.dirname(os.getcwd())
 path = parent_dir+'/train/cropped/ALB/img_00039.jpg'
 sample_img = cv2.imread(path, 0)
-radius = 2000
+path2 = parent_dir+'/train/cropped/ALB/img_00010.jpg'
+sample_img2 = cv2.imread(path, 0)
+
+def Linf(t,g):
+    return np.linalg.norm(t-g,'nuc')
+
+def L1(t,g):
+    return np.linalg.norm(t-g,1)
 
 def L2(t, g):
-  return np.linalg.norm(t-g)
+  return np.linalg.norm((t-g))
+
+def fft_compare(t,g):
+    return L2(np.fft.ifft2(np.fft.fft2(t)),np.fft.ifft2(np.fft.fft2(g)))
+
+
+num_points = 10
+radius = 3000
+loss = L2
 
 def dist(t, g, loss_fn):
+  t = np.array(t, dtype="uint8")
+  g = np.array(g, dtype="uint8")
   return loss_fn(t, g)
 
 def bin_srch(rad, low, high, loss_fn, target, rand_vec, eps):
@@ -40,17 +58,15 @@ def bin_srch(rad, low, high, loss_fn, target, rand_vec, eps):
 
 def diff_search(rand_vec, loss_fn, target):
   err = list()
-  scales = []
-  for x in xrange(1, 20000):
+  for x in xrange(1, 20000,10):
     new_vec = rand_vec * x + target
     cur_d = dist(new_vec, target, loss_fn)
-    scales.append(x)
-    err.append(cur_d)
-  centered_err = [abs(e-radius) for e in err]
-  print str(min(centered_err)) + ' at ' + str(scales[centered_err.index(min(centered_err))])
-  print min(centered_err)
-  return (scales[centered_err.index(min(centered_err))]*rand_vec + target)
-
+    err.append(abs(cur_d - radius))
+    if(abs(cur_d - radius) < radius*0.1):
+        print str(cur_d) + " at " + str(x)
+        return new_vec
+  print "min err: "+ str(min(err))
+  return target
 
 # returns a list of vectors that each
 # represent an image that is 'dist' distance
@@ -66,7 +82,7 @@ def generate(target, points, loss_fn=L2, s1=0.000001, s2=10000):
   for x in xrange(points):
     rand_arr = np.random.rand(w, h)
     rand_arr = (1/np.linalg.norm(rand_arr)) * rand_arr
-    s = diff_search(rand_vec=rand_arr, loss_fn=L2, target=target)
+    s = diff_search(rand_vec=rand_arr, loss_fn=loss_fn, target=target)
     #s = bin_srch(rad=1000.0, low=s1, high=s2, loss_fn=L2, target=target, rand_vec = rand_arr, eps=0.25)
     print "done: " + str(x)
     imgs.append(s)
@@ -75,9 +91,9 @@ def generate(target, points, loss_fn=L2, s1=0.000001, s2=10000):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     plt.imshow(img)
-  ax = plt.subplot(3, 5, points+1)
+  ax = plt.subplot((points/5) + 1, 5, points+1)
   plt.title("radius = "+str(radius))
   plt.imshow(target)
   plt.show()
 
-generate(target=sample_img, points=10)
+generate(target=sample_img, points=num_points,loss_fn=loss)

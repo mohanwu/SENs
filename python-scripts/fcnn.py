@@ -46,8 +46,8 @@ if K.image_dim_ordering() == 'th':
 else:
     X_train = X_train.reshape(X_train.shape[0], img_rows,img_cols,1)
     X_test = X_test.reshape(X_test.shape[0], img_rows,img_cols,1)
-    X_crop_train = X_crop_train.reshape(X_train.shape[0], crop_rows*crop_cols)
-    X_crop_test = X_crop_test.reshape(X_test.shape[0], crop_rows*crop_cols)
+    X_crop_train = X_crop_train.reshape(X_train.shape[0], crop_rows, crop_cols, 1)
+    X_crop_test = X_crop_test.reshape(X_test.shape[0], crop_rows, crop_cols, 1)
     input_shape = (img_rows,img_cols,1)
 
 X_train = X_train.astype('float32')
@@ -65,34 +65,32 @@ print(X_train.shape[0], 'train samples')
 print('X_train shape:', X_crop_train.shape)
 print(X_crop_train.shape[0], 'train samples')
 
-nb_filters = 8
+nb_filters = 32
 kernel_size = (3,3)
 pool_size = (2,2)
 
 input_img = Input(shape=(img_rows,img_cols,1))
-encoded = Convolution2D(nb_filters*2,kernel_size[0],kernel_size[1],
+encoded = Convolution2D(nb_filters,kernel_size[0],kernel_size[1],
             border_mode="same",activation='relu')(input_img)
-encoded = Convolution2D(nb_filters,kernel_size[0],kernel_size[1],
-            border_mode="same",activation='relu')(encoded)
 encoded = MaxPooling2D(pool_size=(2,2))(encoded)
 encoded = Convolution2D(nb_filters,kernel_size[0],kernel_size[1],
             border_mode="same",activation='relu')(encoded)
 encoded = MaxPooling2D(pool_size=(2,2))(encoded)
-encoded = Flatten()(encoded)
-encoded = Dense(1024, activation='sigmoid')(encoded)
+encoded = Convolution2D(1,kernel_size[0],kernel_size[1],
+            border_mode="same",activation='relu')(encoded)
 
 autoencoder = Model(input_img, encoded)
-autoencoder.compile(optimizer='adam', loss='mean_absolute_error')
+autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
 # at this point the representation is (32*32, 1)
 
-if(os.path.isfile("cnn_autoencoder_weights.h5") == True):
-    autoencoder.load_weights("cnn_autoencoder_weights.h5")
+if(os.path.isfile(parent_dir+"/fcnn_weights.pkl") == True):
+    autoencoder.load_weights("fcnn_weights.h5")
 if __name__ == "__main__":
     autoencoder.fit(X_train, X_crop_train, batch_size=batch_size, nb_epoch=nb_epoch,
               verbose=1,
               callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
     #validation_data=(X_test, X_crop_test)
-    autoencoder.save_weights("cnn_autoencoder_weights.h5")
+    autoencoder.save_weights("fcnn_weights.h5")
     print("Saved model to disk")
 
 def show_result(pred_result):

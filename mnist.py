@@ -7,21 +7,31 @@ import numpy as np
 (x_train, _), (x_test, _) = mnist.load_data()
 x_train = x_train.astype('float32') / 255.
 x_test = x_test.astype('float32') / 255.
-x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
-x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
+x_train = x_train.reshape((len(x_train), 28, 28, 1))
+x_test = x_test.reshape((len(x_test), 28, 28, 1))
 
-input_img = Input(shape=(784,))
-encoded = Dense(128, activation='relu')(input_img)
-encoded = Dense(64, activation='relu')(encoded)
-encoded = Dense(32, activation='relu')(encoded)
+input_img = Input(shape=(28, 28, 1))  # adapt this if using `channels_first` image data format
 
-decoded = Dense(64, activation='relu')(encoded)
-decoded = Dense(128, activation='relu')(decoded)
-decoded = Dense(784, activation='sigmoid')(decoded)
+x = Conv2D(16, 3, 3, activation='relu', border_mode='same')(input_img)
+x = MaxPooling2D((2, 2))(x)
+x = Conv2D(8, 3, 3, activation='relu', border_mode='same')(x)
+x = MaxPooling2D((2, 2))(x)
+x = Conv2D(8, 3, 3, activation='relu', border_mode='same')(x)
+encoded = MaxPooling2D((2, 2))(x)
+
+# at this point the representation is (4, 4, 8) i.e. 128-dimensional
+
+x = Conv2D(8, 3, 3, activation='relu', border_mode='same')(encoded)
+x = UpSampling2D((2, 2))(x)
+x = Conv2D(8, 3, 3, activation='relu', border_mode='same')(x)
+x = UpSampling2D((2, 2))(x)
+x = Conv2D(16, 3, 3, activation='relu', border_mode='same')(x)
+x = UpSampling2D((2, 2))(x)
+decoded = Conv2D(1, 3, 3, activation='sigmoid', border_mode='same')(x)
 
 autoencoder = Model(input_img, decoded)
 autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
-autoencoder.load_weights("mnist.h5")
+
 if __name__ == "__main__":
     autoencoder.fit(x_train, x_train,
                     nb_epoch=25,
