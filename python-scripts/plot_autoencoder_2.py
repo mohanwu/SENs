@@ -4,7 +4,7 @@ import pdb
 n = 10
 import os
 parent_dir = os.path.dirname(os.getcwd())
-autoencoder.load_weights("cnn_autoencoder_weights.h5")
+autoencoder.load_weights("peterwang_autoencoder_weights.h5")
 plt.figure(figsize=(20, 4))
 for i in range(n):
     # display original
@@ -16,6 +16,7 @@ for i in range(n):
 
     # display reconstruction
     ax = plt.subplot(2, n, i+1 + n)
+    # THIS IS WHERE the plots are being generated
     result = np.reshape(autoencoder.predict(X_train[i:i+1]),(32,32))
     plt.imshow(result)
     plt.gray()
@@ -33,6 +34,7 @@ for i in range(n):
 
     # display reconstruction
     ax = plt.subplot(2, n, i+1 + n)
+    # THIS IS WHERE the plots are being generated
     result = np.reshape(autoencoder.predict(X_test[i:i+1]),(32,32))
     plt.imshow(result)
     plt.gray()
