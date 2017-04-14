@@ -4,7 +4,7 @@ import pdb
 n = 10
 import os
 parent_dir = os.path.dirname(os.getcwd())
-autoencoder.load_weights("cnn_autoencoder_weights.h5")
+autoencoder.load_weights("cnn_autoencoder_weights2.h5")
 plt.figure(figsize=(20, 4))
 for i in range(n):
     # display original
