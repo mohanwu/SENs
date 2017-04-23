@@ -6,7 +6,7 @@ https://github.com/fchollet/keras/blob/master/examples/mnist_cnn.py
 from __future__ import print_function
 import os
 import numpy as np
-
+np.random.seed(1337)  # for reproducibility
 import crop_encoder_data
 from keras.callbacks import TensorBoard
 from keras.datasets import mnist
@@ -16,13 +16,12 @@ from keras.layers import Convolution2D, MaxPooling2D, Input, Conv2D, Dropout
 from keras import regularizers
 from keras.utils import np_utils
 from keras import backend as K
-from keras.models import load_model
 from PIL import Image
 parent_dir = os.path.dirname(os.getcwd())
 
 batch_size = 50
 nb_classes = 8
-nb_epoch = 20
+nb_epoch = 3
 
 # input image dimensions
 img_rows, img_cols = 128, 128
@@ -75,41 +74,41 @@ pool_size = (2,2)
 input_img = Input(shape=(img_rows,img_cols,1))
 encoded = Conv2D(nb_filters*2,kernel_size[0],kernel_size[1],
             border_mode="same",activation='relu',
-            W_regularizer=regularizers.l1(0.1))(input_img)
-encoded = BatchNormalization(mode=2)(encoded)
+            W_regularizer=regularizers.l1(0.01))(input_img)
 encoded = Conv2D(nb_filters,kernel_size[0],kernel_size[1],
             border_mode="same",activation='relu',
-            W_regularizer=regularizers.l1(0.1))(encoded)
-encoded = BatchNormalization(mode=2)(encoded)
+            W_regularizer=regularizers.l1(0.01))(encoded)
 encoded = Dropout(0.2)(encoded)
 encoded = MaxPooling2D(pool_size=(2,2))(encoded)
 encoded = Conv2D(nb_filters,kernel_size[0],kernel_size[1],
             border_mode="same",activation='relu',
-            W_regularizer=regularizers.l1(0.1))(encoded)
-encoded = BatchNormalization(mode=2)(encoded)
+            W_regularizer=regularizers.l1(0.01))(encoded)
+encoded = Dropout(0.2)(encoded)
 encoded = MaxPooling2D(pool_size=(2,2))(encoded)
+encoded = Conv2D(nb_filters,kernel_size[0],kernel_size[1],
+            border_mode="same",activation='relu',
+            W_regularizer=regularizers.l1(0.01))(encoded)
 encoded = Flatten()(encoded)
-#Dont put regularizers on last layer
 encoded = Dense(1024, activation='sigmoid')(encoded)
+#Dont put regularizers on last layer
 
 autoencoder = Model(input_img, encoded)
 autoencoder.compile(optimizer='adam', loss='mean_absolute_error')
 # at this point the representation is (32*32, 1)
 
-if(os.path.isfile("cnn_autoencoder.h5") == True):
-    del autoencoder
-    autoencoder = load_model('cnn_autoencoder.h5')
 
+if(os.path.isfile("cnn_autoencoder_weights3.h5") == True):
+    autoencoder.load_weights("cnn_autoencoder_weights3.h5")
 
 if __name__ == "__main__":
     autoencoder.fit(X_train, X_crop_train, batch_size=batch_size, nb_epoch=nb_epoch,
               verbose=1,
-              callbacks=[TensorBoard(log_dir='/tmp/autoencoder')],
+              callbacks=[TensorBoard(log_dir='/tmp/autoencoder3')],
               #validation_data=(X_test, X_crop_test)
               )
 
-    autoencoder.save("cnn_autoencoder.h5",overwrite=True)
-    print("cnn_autoencoder "+"Saved model to disk")
+    autoencoder.save_weights("cnn_autoencoder_weights3.h5")
+    print("Saved model to disk")
 
 def show_result(pred_result):
     result = pred_result.copy()
